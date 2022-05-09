@@ -1,0 +1,138 @@
+---
+title: "ESM 204 HW 3"
+author: "Sarah Lam and Alyssa Patterson"
+date: "5/5/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse) 
+library(here)
+library(rootSolve)
+library(janitor)
+```
+
+```{r}
+### Sandy's code
+electric_demand <- read_csv(here("HW3_data.csv")) %>% 
+  select(-1) %>% 
+  clean_names()
+
+model_demand_l <- lm(price_cents  ~ q_low_kwh, data=df)
+model_demand_h <- lm(price_cents ~ q_high_kwh, data=df)
+
+# need to rearrange the parameter to get Q(P)! 
+
+# Qgg = Qlow(P) + Qlow(h) 
+
+# Importantly, since they-intercepts are different, we know that Qagg(P) will have a kink. I include an ifelse() statement to take
+# care of the kink.
+
+# define a function to get demand
+
+demand <- function(p, model){
+  q <- (p - model$coefficients[[1]])/model$coefficients[[2]]
+  q <- ifelse(q<0,0,q)
+  return(q)
+}
+
+# for each p level, return estimated aggregate demand
+demand_agg <- function(p){
+  q <- demand(p, model_demand_l) + demand(p, model_demand_h)
+  return(q)
+}
+
+price = seq(0, 30, length.out = 100)
+Qagg <- map(price, demand_agg) %>% unlist()
+
+df<- tibble(Qagg = Qagg, price = price)
+
+ggplot(df, aes(Qagg, price)) +
+  geom_line()
+
+# I also define functions for calculating the consumer surplus:
+
+CS <- function(p, model){
+  q <- demand(p, model)
+  cs <- 0.5*(model$coefficients[[1]] - p)*q
+  return(cs)
+}
+
+CS_agg <- function(p){
+  cs <- CS(p,model_demand_l) + CS(p,model_demand_h)
+  return(cs)
+}
+```
+
+Last year, the Biden Administration assembled an Inter-agency Working Group (IWG) tasked with
+updating the United States Government’s Social Cost of Carbon (SCC), which has not been comprehensively updated since 2010. The Administration has also called on government agencies to
+address environmental justice, racism, and equity concerns when considering policies designed to
+mitigate climate change.
+While the Interagency Working Group develops a new SCC, the Biden Administration’s “interim”
+value is $51 per metric ton of CO2. The electricity sector is the second largest source of greenhouse
+gas emissions in the U.S. (after transportation). In this homework, you will consider the distributional consequences of imposing a household electricity tax based on the SCC to address the climate
+change problem.
+We recommend using R and writing functions to compute your answers wherever possible.
+Use the following set of facts:
+• Consumers can be separated into two income groups: “high” and “low.” The data set provides
+price (in $) and quantity (in kWh) estimates of demand per month for the two groups. Run
+linear regressions (with an intercept) to estimate the demand curves for “high” and “low”
+income consumers.
+• Initially, there is no tax on electricity consumption.
+• The current electricity price (without any taxes) is $.10 per kWh.
+• The marginal cost of producing a kWh of electricity is linear and has a price-intercept of 0.
+1. One kWh of electricity emits 0.85 pounds of CO2. Assuming that the interim SCC correctly
+reflects the total social cost of one metric ton of CO2, what is the marginal externality cost
+per kwH of electricity?
+
+```{r}
+
+```
+
+
+2. What is the aggregate monthly demand curve for electricity? What is the supply curve for
+electricity? What is the “benefit” to consumers under the status quo? What is the “benefit”
+to producers under the status quo? What is the environmental cost under the status quo?
+
+```{r}
+
+```
+
+3. How is the current consumer benefit divided between “high” and “low” income consumers?
+
+```{r}
+
+```
+
+4. Derive the optimal electricity tax (in cents per kWh) using the interim SCC. Noting that recent
+research has shown the poor face a disproportionate share of the impacts from climate change,
+assume that the climate externality is borne entirely by the “low” income group. What would
+be the effects of this tax on:
+(a) The amount of electricity produced and consumed
+(b) The price of electricity
+(c) Overall welfare of “high” income consumers
+(d) Overall welfare of “low” income consumers
+(e) Power suppliers (i.e., electricity producers)
+(f) Total environmental damage
+(g) Total tax revenue generated
+
+5. Now, assume that all revenue from the electricity tax will be redistributed to the consumers in
+proportion to their pre-tax consumption. For example, if 80% of the electricity was consumed
+by “high” income consumers, then they get 80% of the tax revenue. Additionally, consider the
+fact that current scientific evidence suggests the true SCC may be much higher than $51. For
+a range of SCC values ($51, $75, $100, $125, and $150 per metric ton of CO2), calculate the
+effects of an SCC-based electricity tax on:
+(a) Overall welfare of “high” income consumers
+(b) Overall welfare of “low” income consumers
+(c) Electricity producers
+
+6. Suppose the “high” income group has access to expensive home solar generation. This lowers
+the electricity demand curve for the “high” income group by half (vertically). Under this new
+demand:
+(a) What is total electricity consumption?
+(b) What is the total environmental externality?
+(c) What value of the electricity tax makes the total environmental damage the same as the
+damage when solar panels are available to the high income group?
+
