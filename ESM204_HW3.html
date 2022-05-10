@@ -174,31 +174,18 @@ pre code {
 <pre class="r"><code>### Sandy&#39;s code
 electric_demand &lt;- read_csv(here(&quot;HW3_data.csv&quot;)) %&gt;% 
   select(-1) %&gt;% 
-  clean_names()</code></pre>
-<pre><code>## New names:
-## * `` -&gt; ...1</code></pre>
-<pre><code>## Rows: 19 Columns: 4</code></pre>
-<pre><code>## ── Column specification ────────────────────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## dbl (4): ...1, Price_Cents, Q_Low_Kwh, Q_High_Kwh</code></pre>
-<pre><code>## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code># running linear models to get demand curves for high and low income consumers
-model_demand_low &lt;- lm(price_cents  ~ q_low_kwh, data = electric_demand)
-model_demand_high &lt;- lm(price_cents ~ q_high_kwh, data = electric_demand)
+  clean_names()
 
-# need to rearrange the parameter to get Q(P)! 
+# running linear models to get demand curves for high and low income consumers
+model_demand_low &lt;- lm(price_cents  ~ q_low_kwh, data = electric_demand) #P = 23.37097 -.00011Q
+model_demand_high &lt;- lm(price_cents ~ q_high_kwh, data = electric_demand) #P = 31.606856 -.000052Q
 
-# Qgg = Qlow(P) + Qlow(h) 
-
-# Importantly, since they-intercepts are different, we know that Qagg(P) will have a kink. I include an ifelse() statement to take care of the kink.
-
+# Qgg = Qlow(P) + Qlow(h) </code></pre>
+<pre class="r"><code>#FUNCTIONS
 # define a function to get demand
-
 demand &lt;- function(p, model){
   q &lt;- (p - model$coefficients[[1]])/model$coefficients[[2]]
-  q &lt;- ifelse(q&lt;0,0,q)
+  q &lt;- ifelse(q&lt;0,0,q) #y-intercepts differ, Qagg(P) will have a kink include ifelse() statement to take care of kink
   return(q)
 }
 
@@ -208,10 +195,7 @@ demand_agg &lt;- function(p){
   return(q)
 }
 
-
-# I also define functions for calculating the consumer surplus:
-
-#consumer
+#define functions for calculating the consumer surplus:
 CS &lt;- function(p, model){
   q &lt;- demand(p, model)
   cs &lt;- 0.5*(model$coefficients[[1]] - p)*q
@@ -230,12 +214,13 @@ CS_agg &lt;- function(p){
 metric_ton &lt;- 2204.62
 scc_co2 &lt;- 51
 cents_per_kwh &lt;- (0.85/metric_ton)*100*scc_co2</code></pre>
-<p>Marginal externality cost per kwH of electricity: emissions in metric tons * social cost of carbon * 100 (to convert to cents) = <em>1.97 cents</em></p>
+<p>Marginal externality cost per kwH of electricity: emissions in metric tons * social cost of carbon * 100 (to convert to cents)</p>
+<p>= <strong>1.97 cents</strong></p>
 <ol start="2" style="list-style-type: decimal">
 <li>What is the aggregate monthly demand curve for electricity? What is the supply curve for electricity? What is the “benefit” to consumers under the status quo? What is the “benefit” to producers under the status quo? What is the environmental cost under the status quo?</li>
 </ol>
-<pre class="r"><code># aggregate monthly demand curve for electricity
-
+<p>Low income demand curve:</p>
+<pre class="r"><code># dataframe monthly demand curve for electricity
 e_d_long &lt;- electric_demand %&gt;% 
   pivot_longer(cols = c(q_low_kwh, q_high_kwh),
                names_to = &#39;income_level&#39;,
@@ -244,41 +229,34 @@ e_d_long &lt;- electric_demand %&gt;%
                    income_level == &#39;q_high_kwh&#39; ~ &#39;high&#39;))
 
 # Low income demand curve
-
-# First get lm estimates from data for both low and high
 demand_low &lt;- lm(price_cents ~ kwh, income_level==&#39;low&#39;, 
                  data = e_d_long) 
 extract_eq(model = demand_low, use_coefs = TRUE, coef_digits = 5)</code></pre>
 <p><span class="math display">\[
 \operatorname{\widehat{price\_cents}} = 23.37097 - 0.00011(\operatorname{kwh})
 \]</span></p>
-<div id="high-income-demand-curve" class="section level1">
-<h1>High income demand curve</h1>
+<p>High income demand curve:</p>
 <pre class="r"><code>demand_high &lt;- lm(price_cents ~ kwh, income_level==&#39;high&#39;,
                   data = e_d_long) 
 extract_eq(model = demand_high, use_coefs = TRUE, coef_digits = 5)</code></pre>
 <p><span class="math display">\[
 \operatorname{\widehat{price\_cents}} = 31.60686 - 5e-05(\operatorname{kwh})
 \]</span></p>
-<pre class="r"><code># Generalized demand model from sample code 
+<p>Aggregate demand curve:</p>
+<pre class="r"><code># demand model function
 demand &lt;- function(p, model){
   q &lt;- (p - model$coefficients[[1]])/model$coefficients[[2]]
   q &lt;- ifelse(q&lt;0,0,q)
   return(q)
 }
 
-# Supply Curve for Electricity
+# function for aggregating demand curve
 demand_agg &lt;- function(p){
   q &lt;- demand(p, demand_low) + demand(p, demand_high)
   return(q)
 }
-#demand_agg(10)
-#536,719.5 kWh consumed @ $0.10
 
-
-# sum horizontally to get the **aggregate demand curve:**
-
-
+# sum horizontally to get the aggregate demand curve:
 # Make a vector and extract the lm 
 price = seq(0, 30, length.out = 100)
 Qagg &lt;- map(price, demand_agg) %&gt;% 
@@ -290,42 +268,54 @@ extract_eq(model = demand_agg_eq, use_coefs = TRUE, coef_digits = 5)</code></pre
 \operatorname{\widehat{price}} = 29.78135 - 4e-05(\operatorname{Qagg})
 \]</span></p>
 <pre class="r"><code>agg_slope &lt;- demand_agg_eq$coefficients[2]
-agg_int &lt;- demand_agg_eq$coefficients[1]
-
+agg_int &lt;- demand_agg_eq$coefficients[1]</code></pre>
+<p>Supply curve for electricity:</p>
+<pre class="r"><code>#supply curve for electricity 
 kwh_agg &lt;- demand_agg(10)
 #536,719.5 kWh consumed @ $0.10
 supply_slope &lt;- 10/kwh_agg</code></pre>
-<p><em>P = 0.0000186Q</em> –&gt; price in cents not $</p>
+<p><strong>P = 0.0000186Q</strong> (note: price in cents not $)</p>
 <pre class="r"><code># “benefit” to consumers under the status quo. CS needs Y intercept --&gt; at 0 kWh, price would be $0.305
 # Note the conversion back to dollars 
 cs_baseline &lt;- 0.5*kwh_agg*(0.305 - 0.10)
 # $55,013.74</code></pre>
 <pre class="r"><code># “benefit” to producers under the status quo
-
 ps_baseline &lt;- 0.5*kwh_agg*0.10
 # $26,835.97</code></pre>
 <pre class="r"><code># environmental cost under the status quo
-
 # cost is rectangle 
-env_cost_baseline &lt;- scc_co2*kwh_agg
-# $10,553.75</code></pre>
+env_cost_baseline &lt;- cents_per_kwh*kwh_agg
+# $1,055,365.05</code></pre>
 <ul>
-<li>Consumer Benefit = $5.5014^{4}</li>
-<li>Producer Benefit = $2.6836^{4}</li>
-<li>Environmental Cost = $2.7372693^{7}</li>
+<li>5.501375^{4}</li>
+<li>Consumer Benefit = $ 5.501375^{4}</li>
+<li>Producer Benefit = $ 2.683597^{4}</li>
+<li>Environmental Cost = $ 1.055365^{6}</li>
 </ul>
 <ol start="3" style="list-style-type: decimal">
-<li><p>How is the current consumer benefit divided between “high” and “low” income consumers?</p></li>
-<li><p>Derive the optimal electricity tax (in cents per kWh) using the interim SCC. Noting that recent research has shown the poor face a disproportionate share of the impacts from climate change, assume that the climate externality is borne entirely by the “low” income group. What would be the effects of this tax on:</p></li>
+<li>How is the current consumer benefit divided between “high” and “low” income consumers?</li>
+</ol>
+<pre class="r"><code># finding the consumer surplus for each income group
+cs_low &lt;- CS(10, model_demand_low)
+cs_high &lt;- CS(10, model = model_demand_high)</code></pre>
+<p><strong>Consumer benefit for high income consumers:</strong> $4.487479^{4}</p>
+<p><strong>Consumer benefit for low income consumers:</strong> $8112.43</p>
+<ol start="4" style="list-style-type: decimal">
+<li>Derive the optimal electricity tax (in cents per kWh) using the interim SCC. Based on the interim SCC the optimal electricity tax is <em>1.97</em> cents/kWh Noting that recent research has shown the poor face a disproportionate share of the impacts from climate change, assume that the climate externality is borne entirely by the “low” income group. What would be the effects of this tax on:</li>
 </ol>
 <ol style="list-style-type: lower-alpha">
-<li>The amount of electricity produced and consumed</li>
-<li>The price of electricity</li>
-<li>Overall welfare of “high” income consumers</li>
-<li>Overall welfare of “low” income consumers</li>
-<li>Power suppliers (i.e., electricity producers)</li>
-<li>Total environmental damage</li>
-<li>Total tax revenue generated</li>
+<li><p>This tax decreases the amount of electricity produced and consumed.</p></li>
+<li><p>The price of electricity increases by the amount of the tax, 1.97 cents/kWh.</p></li>
+<li><p>Overall welfare of “high” income consumers</p></li>
+<li><p>Overall welfare of “low” income consumers</p></li>
+<li><p>Power suppliers (i.e., electricity producers)</p></li>
+<li><p>Total environmental damage</p></li>
+<li><p>Total tax revenue generated</p></li>
+<li><p>Overall welfare of “high” income consumers</p></li>
+<li><p>Overall welfare of “low” income consumers</p></li>
+<li><p>Power suppliers (i.e., electricity producers)</p></li>
+<li><p>Total environmental damage</p></li>
+<li><p>Total tax revenue generated</p></li>
 </ol>
 <ol start="5" style="list-style-type: decimal">
 <li>Now, assume that all revenue from the electricity tax will be redistributed to the consumers in proportion to their pre-tax consumption. For example, if 80% of the electricity was consumed by “high” income consumers, then they get 80% of the tax revenue. Additionally, consider the fact that current scientific evidence suggests the true SCC may be much higher than $51. For a range of SCC values ($51, $75, $100, $125, and $150 per metric ton of CO2), calculate the effects of an SCC-based electricity tax on:</li>
@@ -343,7 +333,6 @@ env_cost_baseline &lt;- scc_co2*kwh_agg
 <li>What is the total environmental externality?</li>
 <li>What value of the electricity tax makes the total environmental damage the same as the damage when solar panels are available to the high income group?</li>
 </ol>
-</div>
 
 
 

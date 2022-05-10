@@ -5,8 +5,8 @@ date: "5/5/2022"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include=FALSE, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 library(tidyverse) 
 library(here)
@@ -86,15 +86,18 @@ cents_per_kwh <- (0.85/metric_ton)*100*scc_co2
 ```
 
 Marginal externality cost per kwH of electricity: 
-emissions in metric tons * social cost of carbon * 100 (to convert to cents) = *1.97 cents*
+emissions in metric tons * social cost of carbon * 100 (to convert to cents) 
+
+= **1.97 cents**
 
 2. What is the aggregate monthly demand curve for electricity? What is the supply curve for
 electricity? What is the “benefit” to consumers under the status quo? What is the “benefit”
 to producers under the status quo? What is the environmental cost under the status quo?
 
-```{r}
-# aggregate monthly demand curve for electricity
+Low income demand curve: 
 
+```{r}
+# dataframe monthly demand curve for electricity
 e_d_long <- electric_demand %>% 
   pivot_longer(cols = c(q_low_kwh, q_high_kwh),
                names_to = 'income_level',
@@ -103,37 +106,36 @@ e_d_long <- electric_demand %>%
                    income_level == 'q_high_kwh' ~ 'high'))
 
 # Low income demand curve
-
-# First get lm estimates from data for both low and high
 demand_low <- lm(price_cents ~ kwh, income_level=='low', 
                  data = e_d_long) 
 extract_eq(model = demand_low, use_coefs = TRUE, coef_digits = 5)
 ```
 
-# High income demand curve
+High income demand curve:
+
 ```{r}
 demand_high <- lm(price_cents ~ kwh, income_level=='high',
                   data = e_d_long) 
 extract_eq(model = demand_high, use_coefs = TRUE, coef_digits = 5)
-# Generalized demand model from sample code 
+```
+
+Aggregate demand curve: 
+
+```{r}
+# demand model function
 demand <- function(p, model){
   q <- (p - model$coefficients[[1]])/model$coefficients[[2]]
   q <- ifelse(q<0,0,q)
   return(q)
 }
 
-# Supply Curve for Electricity
+# function for aggregating demand curve
 demand_agg <- function(p){
   q <- demand(p, demand_low) + demand(p, demand_high)
   return(q)
 }
-#demand_agg(10)
-#536,719.5 kWh consumed @ $0.10
 
-
-# sum horizontally to get the **aggregate demand curve:**
-
-
+# sum horizontally to get the aggregate demand curve:
 # Make a vector and extract the lm 
 price = seq(0, 30, length.out = 100)
 Qagg <- map(price, demand_agg) %>% 
@@ -144,15 +146,18 @@ extract_eq(model = demand_agg_eq, use_coefs = TRUE, coef_digits = 5)
 
 agg_slope <- demand_agg_eq$coefficients[2]
 agg_int <- demand_agg_eq$coefficients[1]
+```
 
+Supply curve for electricity: 
+
+```{r}
+#supply curve for electricity 
 kwh_agg <- demand_agg(10)
 #536,719.5 kWh consumed @ $0.10
 supply_slope <- 10/kwh_agg
 ```
 
-
-*P = 0.0000186Q* --> price in cents not $
-
+**P = 0.0000186Q** (note: price in cents not $)
 
 ```{r}
 # “benefit” to consumers under the status quo. CS needs Y intercept --> at 0 kWh, price would be $0.305
@@ -164,7 +169,6 @@ cs_baseline <- 0.5*kwh_agg*(0.305 - 0.10)
 
 ```{r}
 # “benefit” to producers under the status quo
-
 ps_baseline <- 0.5*kwh_agg*0.10
 # $26,835.97
 ```
@@ -172,38 +176,44 @@ ps_baseline <- 0.5*kwh_agg*0.10
 
 ```{r}
 # environmental cost under the status quo
-
 # cost is rectangle 
-env_cost_baseline <- scc_co2*kwh_agg
-# $10,553.75
-
+env_cost_baseline <- cents_per_kwh*kwh_agg
+# $1,055,365.05
 ```
 
-- Consumer Benefit = $`r round(cs_baseline, 0)`
-- Producer Benefit = $`r round(ps_baseline, 0)`
-- Environmental Cost = $`r round(env_cost_baseline, 0)`
+- `r round(cs_baseline, 2)`
+- Consumer Benefit = $ `r round(cs_baseline, 2)`
+- Producer Benefit = $ `r round(ps_baseline, 2)`
+- Environmental Cost = $ `r round(env_cost_baseline, 2)`
 
 3. How is the current consumer benefit divided between “high” and “low” income consumers?
 
 ```{r}
-
+# finding the consumer surplus for each income group
+cs_low <- CS(10, model_demand_low)
+cs_high <- CS(10, model = model_demand_high)
 ```
 
-4. Derive the optimal electricity tax (in cents per kWh) using the interim SCC. Noting that recent
-research has shown the poor face a disproportionate share of the impacts from climate change,
+**Consumer benefit for high income consumers:** $`r round (cs_high/100, 2)`
+
+**Consumer benefit for low income consumers:** $`r round (cs_low/100, 2)`
+
+The low income consumers have a greater consumer befefit than the high income? 
+
+4. Derive the optimal electricity tax (in cents per kWh) using the interim SCC. 
+Based on the interim SCC the optimal electricity tax is *1.97* cents/kWh
+Noting that recent research has shown the poor face a disproportionate share of the impacts from climate change,
 assume that the climate externality is borne entirely by the “low” income group. What would
 be the effects of this tax on:
-(a) The amount of electricity produced and consumed
-(b) The price of electricity
+(a) This tax decreases the amount of electricity produced and consumed.
+(b) The price of electricity increases by the amount of the tax, 1.97 cents/kWh.
 (c) Overall welfare of “high” income consumers
 (d) Overall welfare of “low” income consumers
 (e) Power suppliers (i.e., electricity producers)
 (f) Total environmental damage
 (g) Total tax revenue generated
 
-Based on the interim SCC the optimal electricity tax is *1.97* cents/kWh
-(a) This tax decreases the amount of electricity produced and consumed.
-(b) The price of electricity increases by the amount of the tax, 1.97 cents/kWh
+
 (c) Overall welfare of “high” income consumers
 (d) Overall welfare of “low” income consumers
 (e) Power suppliers (i.e., electricity producers)
