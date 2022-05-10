@@ -12,6 +12,7 @@ library(tidyverse)
 library(here)
 library(rootSolve)
 library(janitor)
+library(equatiomatic)
 ```
 
 ```{r}
@@ -92,8 +93,95 @@ electricity? What is the “benefit” to consumers under the status quo? What i
 to producers under the status quo? What is the environmental cost under the status quo?
 
 ```{r}
+# aggregate monthly demand curve for electricity
+
+e_d_long <- electric_demand %>% 
+  pivot_longer(cols = c(q_low_kwh, q_high_kwh),
+               names_to = 'income_level',
+               values_to = 'kwh') %>% 
+  mutate(income_level = case_when(income_level == 'q_low_kwh' ~ 'low',
+                   income_level == 'q_high_kwh' ~ 'high'))
+
+# Low income demand curve
+
+# First get lm estimates from data for both low and high
+demand_low <- lm(price_cents ~ kwh, income_level=='low', 
+                 data = e_d_long) 
+extract_eq(model = demand_low, use_coefs = TRUE, coef_digits = 5)
+```
+
+# High income demand curve
+```{r}
+demand_high <- lm(price_cents ~ kwh, income_level=='high',
+                  data = e_d_long) 
+extract_eq(model = demand_high, use_coefs = TRUE, coef_digits = 5)
+# Generalized demand model from sample code 
+demand <- function(p, model){
+  q <- (p - model$coefficients[[1]])/model$coefficients[[2]]
+  q <- ifelse(q<0,0,q)
+  return(q)
+}
+
+# Supply Curve for Electricity
+demand_agg <- function(p){
+  q <- demand(p, demand_low) + demand(p, demand_high)
+  return(q)
+}
+#demand_agg(10)
+#536,719.5 kWh consumed @ $0.10
+
+
+# sum horizontally to get the **aggregate demand curve:**
+
+
+# Make a vector and extract the lm 
+price = seq(0, 30, length.out = 100)
+Qagg <- map(price, demand_agg) %>% 
+  unlist()
+agg_df<- tibble(Qagg = Qagg, price = price)
+demand_agg_eq <- lm(price ~ Qagg, data = agg_df) 
+extract_eq(model = demand_agg_eq, use_coefs = TRUE, coef_digits = 5)
+
+agg_slope <- demand_agg_eq$coefficients[2]
+agg_int <- demand_agg_eq$coefficients[1]
+
+kwh_agg <- demand_agg(10)
+#536,719.5 kWh consumed @ $0.10
+supply_slope <- 10/kwh_agg
+```
+
+
+*P = 0.0000186Q* --> price in cents not $
+
+
+```{r}
+# “benefit” to consumers under the status quo. CS needs Y intercept --> at 0 kWh, price would be $0.305
+# Note the conversion back to dollars 
+cs_baseline <- 0.5*kwh_agg*(0.305 - 0.10)
+# $55,013.74
+```
+
+
+```{r}
+# “benefit” to producers under the status quo
+
+ps_baseline <- 0.5*kwh_agg*0.10
+# $26,835.97
+```
+
+
+```{r}
+# environmental cost under the status quo
+
+# cost is rectangle 
+env_cost_baseline <- scc_co2*kwh_agg
+# $10,553.75
 
 ```
+
+- Consumer Benefit = $`r round(cs_baseline, 0)`
+- Producer Benefit = $`r round(ps_baseline, 0)`
+- Environmental Cost = $`r round(env_cost_baseline, 0)`
 
 3. How is the current consumer benefit divided between “high” and “low” income consumers?
 
