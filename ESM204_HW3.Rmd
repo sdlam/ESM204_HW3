@@ -28,8 +28,7 @@ model_demand_high <- lm(price_cents ~ q_high_kwh, data = electric_demand)
 
 # Qgg = Qlow(P) + Qlow(h) 
 
-# Importantly, since they-intercepts are different, we know that Qagg(P) will have a kink. I include an ifelse() statement to take
-# care of the kink.
+# Importantly, since they-intercepts are different, we know that Qagg(P) will have a kink. I include an ifelse() statement to take care of the kink.
 
 # define a function to get demand
 
@@ -78,14 +77,20 @@ income consumers.
 • Initially, there is no tax on electricity consumption.
 • The current electricity price (without any taxes) is $.10 per kWh.
 • The marginal cost of producing a kWh of electricity is linear and has a price-intercept of 0.
+
 1. One kWh of electricity emits 0.85 pounds of CO2. Assuming that the interim SCC correctly
 reflects the total social cost of one metric ton of CO2, what is the marginal externality cost
 per kwH of electricity?
 
 ```{r}
-
+#define variables
+metric_ton <- 2204.62
+scc_co2 <- 51
+cents_per_kwh <- (0.85/metric_ton)*100*scc_co2
 ```
 
+Marginal externality cost per kwH of electricity: 
+emissions in metric tons * social cost of carbon * 100 (to convert to cents) = *1.97 cents*
 
 2. What is the aggregate monthly demand curve for electricity? What is the supply curve for
 electricity? What is the “benefit” to consumers under the status quo? What is the “benefit”
