@@ -54,6 +54,28 @@ CS_agg <- function(p){
   cs <- CS(p,model_demand_l) + CS(p,model_demand_h)
   return(cs)
 }
+
+# marginal cost functions
+mc_slope <- 10/demand_agg(10)
+# marginal cost function
+mc <- function(q){
+  p <- q*(mc_slope)
+  return(p)
+}
+
+mc_q <- function(p){
+  q <- p/mc_slope
+  return(q)
+}
+
+# social cost of carbon to mec function
+scc <- function(scc){
+  mec <- (0.85/metric_ton)*100*scc
+  return(mec)
+}
+# determining marginal external cost
+metric_ton <- 2204.62
+mec_cents <- (0.85/metric_ton)*100*51
 ```
 
 Last year, the Biden Administration assembled an Inter-agency Working Group (IWG) tasked with
@@ -226,6 +248,7 @@ ps_tax <- 0.5*demand_agg(11.97)*0.1197 - env_cost_tax
 ```
 
 
+
 (a) This tax decreases the amount of electricity produced and consumed, the quantity of energy under the tax scenario is `r round(Qt, 2)` kWh.
 (b) The price of electricity increases by the amount of the tax, 1.97 cents/kWh.
 (c) The verall welfare of “high” income consumers under the tax scenario is described by the consumer surplus of $`r round(cs_tax_high, 2)`.
@@ -293,5 +316,37 @@ demand:
 (a) What is total electricity consumption?
 (b) What is the total environmental externality?
 (c) What value of the electricity tax makes the total environmental damage the same as the
-damage when solar panels are available to the high income group?
+damage when solar panels are available to the high income group? shift demand curve down by half. 
 
+
+```{r}
+demand6 <- function(p, model){
+  q <- (p - (0.5*model$coefficients[1]))/model$coefficients[2]
+  q <- ifelse(q<0,0,q)
+  return(q)
+}
+
+# aggregate demand curve function after tax
+demand_agg6 <- function(p){
+  q <- demand6(p, model_demand_low) + demand6(p, model_demand_high)
+  return(q)
+}
+# setting the functions equal to determine new equilibrium price
+uniroot_after_tax <- uniroot(function(p)
+  demand_agg6(p) - mc_q(p),
+        interval = c(0,20))
+price_after_tax <- uniroot_after_tax$root
+electricity6 <- demand_agg6(price_after_tax)
+enviro_cost_6 <- electricity6*mec_cents
+```
+
+**Total electricity consumption:** `r round(electricity6, 2)` kWh
+
+**Total environmental externality:** $`r round(enviro_cost_6/100, 2)`
+```
+
+
+eqmQ = function(a,b,c)
+qstar= a/ b+c
+return qstar
+taxes are equal to marginal external cost
