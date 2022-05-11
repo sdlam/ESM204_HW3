@@ -214,7 +214,7 @@ CS_agg &lt;- function(p){
 metric_ton &lt;- 2204.62
 scc_co2 &lt;- 51
 cents_per_kwh &lt;- (0.85/metric_ton)*100*scc_co2</code></pre>
-<p>Marginal externality cost per kwH of electricity: emissions in metric tons * social cost of carbon * 100 (to convert to cents)</p>
+<p>Marginal externality cost per kWh of electricity: emissions in metric tons * social cost of carbon * 100 (to convert to cents)</p>
 <p>= <strong>1.97 cents</strong></p>
 <ol start="2" style="list-style-type: decimal">
 <li>What is the aggregate monthly demand curve for electricity? What is the supply curve for electricity? What is the “benefit” to consumers under the status quo? What is the “benefit” to producers under the status quo? What is the environmental cost under the status quo?</li>
@@ -288,43 +288,95 @@ env_cost_baseline &lt;- cents_per_kwh*kwh_agg
 # $1,055,365.05</code></pre>
 <ul>
 <li>5.501375^{4}</li>
-<li>Consumer Benefit = $ 5.501375^{4}</li>
-<li>Producer Benefit = $ 2.683597^{4}</li>
-<li>Environmental Cost = $ 1.055365^{6}</li>
+<li>Consumer Benefit = $5.501375^{4}</li>
+<li>Producer Benefit = $2.683597^{4}</li>
+<li>Environmental Cost = $1.055365^{6}</li>
 </ul>
 <ol start="3" style="list-style-type: decimal">
 <li>How is the current consumer benefit divided between “high” and “low” income consumers?</li>
 </ol>
 <pre class="r"><code># finding the consumer surplus for each income group
 cs_low &lt;- CS(10, model_demand_low)
-cs_high &lt;- CS(10, model = model_demand_high)</code></pre>
+cs_high &lt;- CS(10, model_demand_high)</code></pre>
 <p><strong>Consumer benefit for high income consumers:</strong> $4.487479^{4}</p>
 <p><strong>Consumer benefit for low income consumers:</strong> $8112.43</p>
+<p>The low income consumers have a lower consumer benefit than the high income by a difference of $3.676236^{4}</p>
 <ol start="4" style="list-style-type: decimal">
 <li>Derive the optimal electricity tax (in cents per kWh) using the interim SCC. Based on the interim SCC the optimal electricity tax is <em>1.97</em> cents/kWh Noting that recent research has shown the poor face a disproportionate share of the impacts from climate change, assume that the climate externality is borne entirely by the “low” income group. What would be the effects of this tax on:</li>
 </ol>
+<pre class="r"><code># supply curve adjusted for tax 
+#P = 0.0000186Q + 1.97
+Qt &lt;- demand_agg(11.97)
+
+#high and low income surplus = welfare
+cs_tax_high &lt;- CS(.1197, model_demand_high)/100
+#9529852.41
+cs_tax_low &lt;- CS(.1197, model_demand_low)/100
+#2453119.07
+
+env_cost_tax &lt;- 1.97*537634.409/100
+#10591.4
+
+#ps under tax 
+ps_tax &lt;- 0.5*demand_agg(11.97)*0.1197 - env_cost_tax
+#18194.63</code></pre>
 <ol style="list-style-type: lower-alpha">
-<li><p>This tax decreases the amount of electricity produced and consumed.</p></li>
-<li><p>The price of electricity increases by the amount of the tax, 1.97 cents/kWh.</p></li>
-<li><p>Overall welfare of “high” income consumers</p></li>
-<li><p>Overall welfare of “low” income consumers</p></li>
-<li><p>Power suppliers (i.e., electricity producers)</p></li>
-<li><p>Total environmental damage</p></li>
-<li><p>Total tax revenue generated</p></li>
-<li><p>Overall welfare of “high” income consumers</p></li>
-<li><p>Overall welfare of “low” income consumers</p></li>
-<li><p>Power suppliers (i.e., electricity producers)</p></li>
-<li><p>Total environmental damage</p></li>
-<li><p>Total tax revenue generated</p></li>
+<li>This tax decreases the amount of electricity produced and consumed, the quantity of energy under the tax scenario is 4.8096959^{5} kWh.</li>
+<li>The price of electricity increases by the amount of the tax, 1.97 cents/kWh.</li>
+<li>The verall welfare of “high” income consumers under the tax scenario is described by the consumer surplus of $9.529852^{4}.</li>
+<li>The overall welfare of “low” income consumers under the tax scenario is described by the consumer surplus of $2.4531^{4}.</li>
+<li>The surplus to the producers of electricity under the tax scenario is $1.819463^{4}.</li>
+<li>The total environmental damage under the tax scenario is $1.05914^{4}.</li>
+<li>The total tax revenue generated under the tax scenario is $1.05914^{4}.</li>
 </ol>
 <ol start="5" style="list-style-type: decimal">
-<li>Now, assume that all revenue from the electricity tax will be redistributed to the consumers in proportion to their pre-tax consumption. For example, if 80% of the electricity was consumed by “high” income consumers, then they get 80% of the tax revenue. Additionally, consider the fact that current scientific evidence suggests the true SCC may be much higher than $51. For a range of SCC values ($51, $75, $100, $125, and $150 per metric ton of CO2), calculate the effects of an SCC-based electricity tax on:</li>
+<li>Assuming that all revenue from the electricity tax will be redistributed to the consumers in proportion to their pre-tax consumption high income Additionally, consider the fact that current scientific evidence suggests the true SCC may be much higher than $51. For a range of SCC values ($51, $75, $100, $125, and $150 per metric ton of CO2), calculate the effects of an SCC-based electricity tax on:</li>
 </ol>
 <ol style="list-style-type: lower-alpha">
 <li>Overall welfare of “high” income consumers</li>
 <li>Overall welfare of “low” income consumers</li>
 <li>Electricity producers</li>
 </ol>
+<pre class="r"><code>#cs_tax_high 
+#$51
+  
+   #- effects on &quot;high&quot; income consumers: 
+  
+  #- effects on &quot;low&quot; income consumers: 
+  
+ # - effects on electricity producers:
+
+#$75
+  
+   #- effects on &quot;high&quot; income consumers: 
+  
+ # - effects on &quot;low&quot; income consumers: 
+  
+  #- effects on electricity producers:
+
+#$100 
+  
+ #  - effects on &quot;high&quot; income consumers: 
+  
+ # - effects on &quot;low&quot; income consumers: 
+  
+#  - effects on electricity producers:
+
+#$125
+  
+  # - effects on &quot;high&quot; income consumers: 
+  
+ # - effects on &quot;low&quot; income consumers: 
+  
+ # - effects on electricity producers:
+
+#$150 
+  
+  # - effects on &quot;high&quot; income consumers: 
+  
+ # - effects on &quot;low&quot; income consumers: 
+  
+ # - effects on electricity producers:</code></pre>
 <ol start="6" style="list-style-type: decimal">
 <li>Suppose the “high” income group has access to expensive home solar generation. This lowers the electricity demand curve for the “high” income group by half (vertically). Under this new demand:</li>
 </ol>

@@ -243,46 +243,46 @@ effects of an SCC-based electricity tax on:
 (c) Electricity producers
 
 ```{r}
-cs_tax_high + 
+#cs_tax_high 
 #$51
   
-   - effects on "high" income consumers: 
+   #- effects on "high" income consumers: 
   
-  - effects on "low" income consumers: 
+  #- effects on "low" income consumers: 
   
-  - effects on electricity producers:
+ # - effects on electricity producers:
 
 #$75
   
-   - effects on "high" income consumers: 
+   #- effects on "high" income consumers: 
   
-  - effects on "low" income consumers: 
+ # - effects on "low" income consumers: 
   
-  - effects on electricity producers:
+  #- effects on electricity producers:
 
 #$100 
   
-   - effects on "high" income consumers: 
+ #  - effects on "high" income consumers: 
   
-  - effects on "low" income consumers: 
+ # - effects on "low" income consumers: 
   
-  - effects on electricity producers:
+#  - effects on electricity producers:
 
 #$125
   
-   - effects on "high" income consumers: 
+  # - effects on "high" income consumers: 
   
-  - effects on "low" income consumers: 
+ # - effects on "low" income consumers: 
   
-  - effects on electricity producers:
+ # - effects on electricity producers:
 
 #$150 
   
-   - effects on "high" income consumers: 
+  # - effects on "high" income consumers: 
   
-  - effects on "low" income consumers: 
+ # - effects on "low" income consumers: 
   
-  - effects on electricity producers:
+ # - effects on electricity producers:
 ```
 
 6. Suppose the “high” income group has access to expensive home solar generation. This lowers
