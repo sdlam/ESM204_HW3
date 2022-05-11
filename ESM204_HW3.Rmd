@@ -225,13 +225,7 @@ ps_tax <- 0.5*demand_agg(11.97)*0.1197 - env_cost_tax
 #18194.63
 ```
 
-<<<<<<< HEAD
-```{r}
 
-```
-
-
-=======
 (a) This tax decreases the amount of electricity produced and consumed, the quantity of energy under the tax scenario is `r round(Qt, 2)` kWh.
 (b) The price of electricity increases by the amount of the tax, 1.97 cents/kWh.
 (c) The verall welfare of “high” income consumers under the tax scenario is described by the consumer surplus of $`r round(cs_tax_high, 2)`.
