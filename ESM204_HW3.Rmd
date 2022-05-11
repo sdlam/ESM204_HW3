@@ -232,6 +232,12 @@ env_cost_tax <- 1.97*537634.409/100
 #10591.4
 ```
 
+```{r}
+
+```
+
+
+
 5. Assuming that all revenue from the electricity tax will be redistributed to the consumers in
 proportion to their pre-tax consumption high income 
 Additionally, consider the fact that current scientific evidence suggests the true SCC may be much higher than $51. For
