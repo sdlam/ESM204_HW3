@@ -205,13 +205,6 @@ Based on the interim SCC the optimal electricity tax is *1.97* cents/kWh
 Noting that recent research has shown the poor face a disproportionate share of the impacts from climate change,
 assume that the climate externality is borne entirely by the “low” income group. What would
 be the effects of this tax on:
-(a) This tax decreases the amount of electricity produced and consumed, the quantity of energy under the tax scenario is `r round(Qt, 2)` kWh.
-(b) The price of electricity increases by the amount of the tax, 1.97 cents/kWh.
-(c) The verall welfare of “high” income consumers under the tax scenario is described by the consumer surplus of $`r round(cs_tax_high, 2)`.
-(d) The overall welfare of “low” income consumers under the tax scenario is described by the consumer surplus of $`r round(cs_tax_low)`.
-(e) The surplus to the producers of electricity under the tax scenario is $`r round(ps_tax, 2)`.
-(f) The total environmental damage under the tax scenario is $`r round(env_cost_tax, 2)`.
-(g) The total tax revenue generated under the tax scenario is $`r round(env_cost_tax, 2)`.
 
 ```{r}
 # supply curve adjusted for tax 
@@ -224,13 +217,21 @@ cs_tax_high <- CS(.1197, model_demand_high)/100
 cs_tax_low <- CS(.1197, model_demand_low)/100
 #2453119.07
 
+env_cost_tax <- 1.97*537634.409/100
+#10591.4
+
 #ps under tax 
 ps_tax <- 0.5*demand_agg(11.97)*0.1197 - env_cost_tax
 #18194.63
-
-env_cost_tax <- 1.97*537634.409/100
-#10591.4
 ```
+
+(a) This tax decreases the amount of electricity produced and consumed, the quantity of energy under the tax scenario is `r round(Qt, 2)` kWh.
+(b) The price of electricity increases by the amount of the tax, 1.97 cents/kWh.
+(c) The verall welfare of “high” income consumers under the tax scenario is described by the consumer surplus of $`r round(cs_tax_high, 2)`.
+(d) The overall welfare of “low” income consumers under the tax scenario is described by the consumer surplus of $`r round(cs_tax_low)`.
+(e) The surplus to the producers of electricity under the tax scenario is $`r round(ps_tax, 2)`.
+(f) The total environmental damage under the tax scenario is $`r round(env_cost_tax, 2)`.
+(g) The total tax revenue generated under the tax scenario is $`r round(env_cost_tax, 2)`.
 
 5. Assuming that all revenue from the electricity tax will be redistributed to the consumers in
 proportion to their pre-tax consumption high income 
