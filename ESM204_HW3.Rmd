@@ -85,7 +85,7 @@ scc_co2 <- 51
 cents_per_kwh <- (0.85/metric_ton)*100*scc_co2
 ```
 
-Marginal externality cost per kwH of electricity: 
+Marginal externality cost per kWh of electricity: 
 emissions in metric tons * social cost of carbon * 100 (to convert to cents) 
 
 = **1.97 cents**
@@ -182,23 +182,23 @@ env_cost_baseline <- cents_per_kwh*kwh_agg
 ```
 
 - `r round(cs_baseline, 2)`
-- Consumer Benefit = $ `r round(cs_baseline, 2)`
-- Producer Benefit = $ `r round(ps_baseline, 2)`
-- Environmental Cost = $ `r round(env_cost_baseline, 2)`
+- Consumer Benefit = $`r round(cs_baseline, 2)`
+- Producer Benefit = $`r round(ps_baseline, 2)`
+- Environmental Cost = $`r round(env_cost_baseline, 2)`
 
 3. How is the current consumer benefit divided between “high” and “low” income consumers?
 
 ```{r}
 # finding the consumer surplus for each income group
 cs_low <- CS(10, model_demand_low)
-cs_high <- CS(10, model = model_demand_high)
+cs_high <- CS(10, model_demand_high)
 ```
 
-**Consumer benefit for high income consumers:** $`r round (cs_high/100, 2)`
+**Consumer benefit for high income consumers:** $`r round(cs_high/100, 2)`
 
-**Consumer benefit for low income consumers:** $`r round (cs_low/100, 2)`
+**Consumer benefit for low income consumers:** $`r round(cs_low/100, 2)`
 
-The low income consumers have a greater consumer befefit than the high income? 
+The low income consumers have a lower consumer benefit than the high income by a difference of $`r round((cs_high-cs_low)/100, 2)`
 
 4. Derive the optimal electricity tax (in cents per kWh) using the interim SCC. 
 Based on the interim SCC the optimal electricity tax is *1.97* cents/kWh
@@ -213,17 +213,10 @@ be the effects of this tax on:
 (f) Total environmental damage
 (g) Total tax revenue generated
 
-
-(c) Overall welfare of “high” income consumers
-(d) Overall welfare of “low” income consumers
-(e) Power suppliers (i.e., electricity producers)
-(f) Total environmental damage
-(g) Total tax revenue generated
-
 ```{r}
-
+# supply curve adjusted for tax 
+#P = 0.0000186Q - 1.97
 ```
-
 
 5. Now, assume that all revenue from the electricity tax will be redistributed to the consumers in
 proportion to their pre-tax consumption. For example, if 80% of the electricity was consumed
