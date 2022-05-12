@@ -102,9 +102,11 @@ per kwH of electricity?
 
 ```{r}
 #define variables
+mec <- function(q, p){
 metric_ton <- 2204.62
 scc_co2 <- 51
 cents_per_kwh <- (0.85/metric_ton)*100*scc_co2
+}
 ```
 
 Marginal externality cost per kWh of electricity: 
@@ -246,6 +248,7 @@ env_cost_tax <- 1.97*537634.409/100
 ps_tax <- 0.5*demand_agg(11.97)*0.1197 - env_cost_tax
 #18194.63
 ```
+
 
 
 
