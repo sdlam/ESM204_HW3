@@ -205,15 +205,44 @@ CS &lt;- function(p, model){
 CS_agg &lt;- function(p){
   cs &lt;- CS(p,model_demand_l) + CS(p,model_demand_h)
   return(cs)
-}</code></pre>
+}
+
+# marginal cost functions
+mc_slope &lt;- 10/demand_agg(10)
+# marginal cost function
+mc &lt;- function(q){
+  p &lt;- q*(mc_slope)
+  return(p)
+}
+
+mc_q &lt;- function(p){
+  q &lt;- p/mc_slope
+  return(q)
+}
+
+# social cost of carbon to mec function
+scc &lt;- function(scc){
+  mec &lt;- (0.85/metric_ton)*100*scc
+  return(mec)
+}
+# determining marginal external cost
+metric_ton &lt;- 2204.62
+mec_cents &lt;- (0.85/metric_ton)*100*51
+
+
+
+scc_co2 &lt;- 51
+cents_per_kwh &lt;- (0.85/metric_ton)*100*scc_co2</code></pre>
 <p>Last year, the Biden Administration assembled an Inter-agency Working Group (IWG) tasked with updating the United States Government’s Social Cost of Carbon (SCC), which has not been comprehensively updated since 2010. The Administration has also called on government agencies to address environmental justice, racism, and equity concerns when considering policies designed to mitigate climate change. While the Interagency Working Group develops a new SCC, the Biden Administration’s “interim” value is $51 per metric ton of CO2. The electricity sector is the second largest source of greenhouse gas emissions in the U.S. (after transportation). In this homework, you will consider the distributional consequences of imposing a household electricity tax based on the SCC to address the climate change problem. We recommend using R and writing functions to compute your answers wherever possible. Use the following set of facts: • Consumers can be separated into two income groups: “high” and “low.” The data set provides price (in $) and quantity (in kWh) estimates of demand per month for the two groups. Run linear regressions (with an intercept) to estimate the demand curves for “high” and “low” income consumers. • Initially, there is no tax on electricity consumption. • The current electricity price (without any taxes) is $.10 per kWh. • The marginal cost of producing a kWh of electricity is linear and has a price-intercept of 0.</p>
 <ol style="list-style-type: decimal">
 <li>One kWh of electricity emits 0.85 pounds of CO2. Assuming that the interim SCC correctly reflects the total social cost of one metric ton of CO2, what is the marginal externality cost per kwH of electricity?</li>
 </ol>
 <pre class="r"><code>#define variables
+mec &lt;- function(q, p){
 metric_ton &lt;- 2204.62
 scc_co2 &lt;- 51
-cents_per_kwh &lt;- (0.85/metric_ton)*100*scc_co2</code></pre>
+cents_per_kwh &lt;- (0.85/metric_ton)*100*scc_co2
+}</code></pre>
 <p>Marginal externality cost per kWh of electricity: emissions in metric tons * social cost of carbon * 100 (to convert to cents)</p>
 <p>= <strong>1.97 cents</strong></p>
 <ol start="2" style="list-style-type: decimal">
@@ -283,7 +312,7 @@ cs_baseline &lt;- 0.5*kwh_agg*(0.305 - 0.10)
 ps_baseline &lt;- 0.5*kwh_agg*0.10
 # $26,835.97</code></pre>
 <pre class="r"><code># environmental cost under the status quo
-# cost is rectangle 
+# cost is rectangle
 env_cost_baseline &lt;- cents_per_kwh*kwh_agg
 # $1,055,365.05</code></pre>
 <ul>
@@ -300,91 +329,285 @@ cs_low &lt;- CS(10, model_demand_low)
 cs_high &lt;- CS(10, model_demand_high)</code></pre>
 <p><strong>Consumer benefit for high income consumers:</strong> $4.487479^{4}</p>
 <p><strong>Consumer benefit for low income consumers:</strong> $8112.43</p>
-<p>The low income consumers have a lower consumer benefit than the high income by a difference of $3.676236^{4}</p>
+<p>The low income consumers have less consumer benefit than the high income by a difference of $3.676236^{4}</p>
 <ol start="4" style="list-style-type: decimal">
 <li>Derive the optimal electricity tax (in cents per kWh) using the interim SCC. Based on the interim SCC the optimal electricity tax is <em>1.97</em> cents/kWh Noting that recent research has shown the poor face a disproportionate share of the impacts from climate change, assume that the climate externality is borne entirely by the “low” income group. What would be the effects of this tax on:</li>
 </ol>
-<pre class="r"><code># agg demand curve adjusted for tax 
-#P = 0.0000186Q + 1.97
-Qt &lt;- demand_agg(11.97)
-
-#high and low income surplus = welfare
-cs_tax_high &lt;- CS(.1197, model_demand_high)/100
-#9529852.41
-cs_tax_low &lt;- CS(.1197, model_demand_low)/100
-#2453119.07
-
-env_cost_tax &lt;- 1.97*537634.409/100
-#10591.4
-
-#ps under tax 
-ps_tax &lt;- 0.5*demand_agg(11.97)*0.1197 - env_cost_tax
-#18194.63</code></pre>
+<div id="agg-demand-curve-adjusted-for-tax" class="section level1">
+<h1>agg demand curve adjusted for tax</h1>
+<p>#p = 29.78135 - .0000368Q - 11.97 = p = 17.81135 - .0000368Q</p>
+<p>#Agg demand after tax demand_after_tax &lt;- function(p, model, mec){ q &lt;- (p - model<span class="math inline">\(coefficients[[1]])-mec/model\)</span>coefficients[[2]] q &lt;- ifelse(q&lt;0,0,q) return(q) }</p>
+<p>demand_agg_after_tax &lt;- function(p, mec){ q &lt;- demand_after_tax(p, demand_low, mec) + demand_after_tax(p, demand_high, mec) return(q) }</p>
+<p>#q_star_51 &lt;- demand_agg_after_tax(10, 1.97) #p_star_51 &lt;- supply_price(q_star_51) #p_plus_t_51 &lt;- p_star_51 + t_51 #CS_0_high &lt;- CS(p_0, high_demand) #CS_high_51 &lt;- CS(p_plus_t_51, high_demand) #CS_0_low &lt;- CS(p_0, low_demand) - (t_51 * q_0) #CS_low_51 &lt;- CS(p_plus_t_51, low_demand) - (t_51 * q_star_51) #PS_0 &lt;- PS(p_0) #PS_51 &lt;- PS(p_star_51) #TEC_0 &lt;- TEC(p_0) #TEC_51 &lt;- TEC(p_star_51) #tax_revenue_51 &lt;- t_51 * q_star_51</p>
+</div>
+<div id="total-environmental-damage" class="section level1">
+<h1>total environmental damage</h1>
+<p>enviro_cost_tax &lt;- mec_cents*demand_agg_after_tax(price_after_tax)</p>
+<p>tax_revenue &lt;- mec_cents<em>demand_agg_after_tax(price_after_tax) # amount of electricity consumed after tax consumption_after_tax &lt;- demand_agg_after_tax(price_after_tax) # overall welfare to high and low income consumers cs_tax_high &lt;- CS(p = price_after_tax + mec_cents, model = model_demand_h) cs_tax_low &lt;- CS(p = price_after_tax + mec_cents, model = model_demand_l) - enviro_damage_after_tax # welfare for electricity producer PS_after_tax &lt;- function(p){ ps &lt;- (p</em>demand_agg_after_tax(p))/2 # producer surplus return(ps) } ps_tax &lt;- PS_after_tax(price_after_tax)</p>
+<p>#high and low income surplus = welfare cs_tax_high &lt;- CS(.1197, model_demand_high)/100 #9529852.41 cs_tax_low &lt;- CS(.1197, model_demand_low)/100 #2453119.07</p>
+<p>env_cost_tax &lt;- 1.97*537634.409/100 #10591.4</p>
+<p>#ps under tax ps_tax &lt;- 0.5<em>demand_agg(11.97)</em>0.1197 - env_cost_tax #18194.63</p>
 <ol style="list-style-type: lower-alpha">
-<li>This tax decreases the amount of electricity produced and consumed, the quantity of energy under the tax scenario is 4.8096959^{5} kWh.</li>
-<li>The price of electricity increases by the amount of the tax, 1.97 cents/kWh.</li>
-<li>The verall welfare of “high” income consumers under the tax scenario is described by the consumer surplus of $9.529852^{4}.</li>
-<li>The overall welfare of “low” income consumers under the tax scenario is described by the consumer surplus of $2.4531^{4}.</li>
-<li>The surplus to the producers of electricity under the tax scenario is $1.819463^{4}.</li>
-<li>The total environmental damage under the tax scenario is $1.05914^{4}.</li>
-<li>The total tax revenue generated under the tax scenario is $1.05914^{4}. &gt;&gt;&gt;&gt;&gt;&gt;&gt; 0dfe8b4174c27a4193a95bc16a361e5ca87ca60a</li>
+<li><p>the new quantity of electricity produced and consumed with the tax will be approximately <strong>5.002166^{5}kWh,</strong> which is <strong>-3.650287^{4} kWh</strong> less than the status quo.</p></li>
+<li><p>The new price of electricity with the tax will increase from 10 cents to <strong>205.95 cents.</strong></p></li>
+<li><p>welfare effect of tax on high income consumers: <strong>$3.198862^{4}</strong></p></li>
+<li><p>welfare effect of tax on low income consumers: <strong>$-9.7588656^{5}</strong></p></li>
+<li><p>overall effect of tax on power generators: a <strong>$2.331009^{4}</strong> decrease</p></li>
+<li><p>The total environmental damage decreases from <strong>$1.026496^{4}</strong> to <strong><span class="math inline">\(9.8358854\times 10^{5},** a change of **\)</span>-9.7332358^{5}.</strong></p></li>
+<li><p>The total tax revenue generated from the policy was <strong>$9.8358854^{5}.</strong></p></li>
 </ol>
-<ol start="5" style="list-style-type: decimal">
-<li>Assuming that all revenue from the electricity tax will be redistributed to the consumers in proportion to their pre-tax consumption high income Additionally, consider the fact that current scientific evidence suggests the true SCC may be much higher than $51. For a range of SCC values ($51, $75, $100, $125, and $150 per metric ton of CO2), calculate the effects of an SCC-based electricity tax on:</li>
-</ol>
-<ol style="list-style-type: lower-alpha">
-<li>Overall welfare of “high” income consumers</li>
-<li>Overall welfare of “low” income consumers</li>
-<li>Electricity producers</li>
-</ol>
-<pre class="r"><code>#cs_tax_high 
-#$51
+<div id="redistribution" class="section level3">
+<h3><strong>5. Redistribution</strong></h3>
+<pre class="r"><code># calculating relative electricity use under the status quo 
+proportion_high &lt;- demand(demand_high, p = 10)/((demand(demand_high, p = 10)) + demand(demand_low, p = 10))
+proportion_low &lt;- demand(demand_low, p = 10)/((demand(demand_high, p = 10)) + demand(demand_low, p = 10))
+welfare_h_5 &lt;- (cs_high_tax + proportion_high*env_cost_tax)
+welfare_l_5 &lt;- (cs_low_tax + proportion_low*env_cost_tax)
+ps_5 &lt;- ps_tax</code></pre>
+<hr />
+<p>estimates of distributional effects of a carbon tax with different SCC values are as follows:</p>
+<p><strong>$51/ton:</strong></p>
+<p>Overall welfare of “high” income consumers: <strong>$7.93203^{5}</strong></p>
+<p>Overall welfare of “low” income consumers:<strong>$-7.5351241^{5}</strong></p>
+<p>Welfare to power suppliers: <strong>$2.3310094^{4}</strong></p>
+<pre class="r"><code>scc &lt;- function(scc){
+  mec &lt;- (0.85/2204)*100*scc
+  return(mec)}
+mc_q &lt;- function(p){
+  q &lt;- p/mc_slope
+  return(q)
+}
+mc_q &lt;- function(p){
+  q &lt;- p/mc_slope
+  return(q)
+}
+mc_slope &lt;- 10/demand_agg(10)
+# marginal cost function
+mc &lt;- function(q){
+  p &lt;- q*(mc_slope)
+  return(p)
+}
+CS &lt;- function(p, model){
+  q &lt;- demand(p, model)
+  cs &lt;- 0.5*(model$coefficients[[1]] - p)*q
+  return(cs)
+}</code></pre>
+<p><strong>$75/ton:</strong></p>
+<pre class="r"><code>scc5 &lt;- 75
+demand_after_tax &lt;- function(p, model, mec){
+  q &lt;- (p - model$coefficients[[1]] + mec)/model$coefficients[[2]]
+  q &lt;- ifelse(q&lt;0,0,q)
+  return(q)
+}
+# aggregate demand curve function after tax
+demand_agg_after_tax &lt;- function(p, mec){
+  q &lt;- demand_after_tax(p, demand_low, mec = mec) + demand_after_tax(p, demand_high, mec = mec)
+  return(q)
+}
+# new consumer surplus function
+CS_after_tax &lt;- function(p, model){
+  q &lt;- demand_after_tax(p, model)
+  cs &lt;- 0.5*(model$coefficients[[1]] - p)*q
+  return(cs)
+}
+# setting the functions equal to determine new equilibrium price after tax
+uniroot_after_tax &lt;- uniroot(function(p)
+  demand_agg_after_tax(p, mec = scc(scc5)) - mc_q(p),
+        interval = c(0,20))
+price_after_tax &lt;- uniroot_after_tax$root
+# total environmental damage
+enviro_damage_after_tax &lt;- scc(scc5)*demand_agg_after_tax(price_after_tax, mec = scc(scc5))
   
-   #- effects on &quot;high&quot; income consumers: 
+env_cost_tax &lt;- scc(scc5)*demand_agg_after_tax(price_after_tax, mec = scc(scc5))
+# amount of electricity consumed after tax
+consumption_after_tax &lt;- demand_agg_after_tax(price_after_tax, mec = scc(scc5))
+# overall welfare to high and low income consumers
+cs_high_tax &lt;- CS(p = price_after_tax + scc(scc5), model = demand_high)
+cs_low_tax &lt;- CS(p = price_after_tax + scc(scc5), model = demand_low) - enviro_damage_after_tax
+# welfare for electricity producer
+ps_tax &lt;- function(p, mec){
+  ps &lt;- (p*demand_agg_after_tax(p, mec = mec))/2 # producer surplus
+  return(ps)
+}
+ps_tax &lt;- ps_tax(price_after_tax, mec = scc(scc5))
+welfare_h_5 &lt;- (cs_high_tax + proportion_high*env_cost_tax)/100
+welfare_l_5 &lt;- (cs_low_tax + proportion_low*env_cost_tax)/100
+ps_5 &lt;- 21737.48</code></pre>
+<p>Overall welfare of “high” income consumers:<strong>$4.816767^{4}</strong></p>
+<p>Overall welfare of “low” income consumers:<strong>$-4837.78</strong></p>
+<p>Welfare to power suppliers: <strong>$2.173748^{4}</strong></p>
+<p><strong>$100/ton:</strong></p>
+<pre class="r"><code># inputting social cost of carbon
+scc5 &lt;- 100
+# finding the new demand curve under the tax 
+demand_after_tax &lt;- function(p, model, mec){
+  q &lt;- (p - model$coefficients[[1]] + mec)/model$coefficients[[2]]
+  q &lt;- ifelse(q&lt;0,0,q)
+  return(q)
+}
+# aggregate demand curve function after tax
+demand_agg_after_tax &lt;- function(p, mec){
+  q &lt;- demand_after_tax(p, demand_low, mec = mec) + demand_after_tax(p, demand_high, mec = mec)
+  return(q)
+}
+# new consumer surplus function
+CS_after_tax &lt;- function(p, model){
+  q &lt;- demand_after_tax(p, model)
+  cs &lt;- 0.5*(model$coefficients[[1]] - p)*q
+  return(cs)
+}
+# setting the functions equal to determine new equilibrium price after tax
+uniroot_after_tax &lt;- uniroot(function(p)
+  demand_agg_after_tax(p, mec = scc(scc5)) - mc_q(p),
+        interval = c(0,20))
+price_after_tax &lt;- uniroot_after_tax$root
+# total environmental damage
+enviro_damage_after_tax &lt;- scc(scc5)*demand_agg_after_tax(price_after_tax, mec = scc(scc5))
   
-  #- effects on &quot;low&quot; income consumers: 
+env_cost_tax &lt;- scc(scc5)*demand_agg_after_tax(price_after_tax, mec = scc(scc5))
+# amount of electricity consumed after tax
+consumption_after_tax &lt;- demand_agg_after_tax(price_after_tax, mec = scc(scc5))
+# overall welfare to high and low income consumers
+cs_high_tax &lt;- CS(p = price_after_tax + scc(scc5), model = demand_high)
+cs_low_tax &lt;- CS(p = price_after_tax + scc(scc5), model = demand_low) - enviro_damage_after_tax
+# welfare for electricity producer
+ps_tax &lt;- function(p, mec){
+  ps &lt;- (p*demand_agg_after_tax(p, mec = mec))/2 # producer surplus
+  return(ps)
+}
+ps_tax &lt;- ps_tax(price_after_tax, mec = scc(scc5))
+welfare_h_5 &lt;- (cs_high_tax + proportion_high*env_cost_tax)/100 
+welfare_l_5 &lt;- (cs_low_tax + proportion_low*env_cost_tax)/100 
+ps_5 &lt;- 20173.13</code></pre>
+<p>Overall welfare of “high” income consumers:<strong>$4.88853^{4}</strong></p>
+<p>Overall welfare of “low” income consumers:<strong>$-8548.95</strong></p>
+<p>Welfare to power suppliers:<strong>$2.017313^{4}</strong></p>
+<p><strong>$125/ton:</strong></p>
+<pre class="r"><code># inputting social cost of carbon
+scc5 &lt;- 125
+# finding the new demand curve under the tax 
+demand_after_tax &lt;- function(p, model, mec){
+  q &lt;- (p - model$coefficients[[1]] + mec)/model$coefficients[[2]]
+  q &lt;- ifelse(q&lt;0,0,q)
+  return(q)
+}
+# aggregate demand curve function after tax
+demand_agg_after_tax &lt;- function(p, mec){
+  q &lt;- demand_after_tax(p, demand_low, mec = mec) + demand_after_tax(p, demand_high, mec = mec)
+  return(q)
+}
+# new consumer surplus function
+CS_after_tax &lt;- function(p, model){
+  q &lt;- demand_after_tax(p, model)
+  cs &lt;- 0.5*(model$coefficients[[1]] - p)*q
+  return(cs)
+}
+# setting the functions equal to determine new equilibrium price after tax
+uniroot_after_tax &lt;- uniroot(function(p)
+  demand_agg_after_tax(p, mec = scc(scc5)) - mc_q(p),
+        interval = c(0,20))
+price_after_tax &lt;- uniroot_after_tax$root
+# total environmental damage
+enviro_damage_after_tax &lt;- scc(scc5)*demand_agg_after_tax(price_after_tax, mec = scc(scc5))
   
- # - effects on electricity producers:
-
-#$75
+env_cost_tax &lt;- scc(scc5)*demand_agg_after_tax(price_after_tax, mec = scc(scc5))
+# amount of electricity consumed after tax
+consumption_after_tax &lt;- demand_agg_after_tax(price_after_tax, mec = scc(scc5))
+# overall welfare to high and low income consumers
+cs_high_tax &lt;- CS(p = price_after_tax + scc(scc5), model = demand_high)
+cs_low_tax &lt;- CS(p = price_after_tax + scc(scc5), model = demand_low) - enviro_damage_after_tax
+# welfare for electricity producer
+ps_tax &lt;- function(p, mec){
+  ps &lt;- (p*demand_agg_after_tax(p, mec = mec))/2 # producer surplus
+  return(ps)
+}
+ps_tax &lt;- ps_tax(price_after_tax, mec = scc(scc5))
+welfare_h_5 &lt;- (cs_high_tax + proportion_high*env_cost_tax)/100 
+welfare_l_5 &lt;- (cs_low_tax + proportion_low*env_cost_tax)/100 
+ps_5 &lt;- 18665.76</code></pre>
+<p>Overall welfare of “high” income consumers: <strong>$4.941293^{4}</strong></p>
+<p>Overall welfare of “low” income consumers: <strong>$-1.195735^{4}</strong></p>
+<p>Welfare to power suppliers: <strong>$1.866576^{4}</strong></p>
+<p><strong>$150/ton:</strong></p>
+<pre class="r"><code># inputting social cost of carbon
+scc5 &lt;- 150
+# finding the new demand curve under the tax 
+demand_after_tax &lt;- function(p, model, mec){
+  q &lt;- (p - model$coefficients[[1]] + mec)/model$coefficients[[2]]
+  q &lt;- ifelse(q&lt;0,0,q)
+  return(q)
+}
+# aggregate demand curve function after tax
+demand_agg_after_tax &lt;- function(p, mec){
+  q &lt;- demand_after_tax(p, demand_low, mec = mec) + demand_after_tax(p, demand_high, mec = mec)
+  return(q)
+}
+# new consumer surplus function
+CS_after_tax &lt;- function(p, model){
+  q &lt;- demand_after_tax(p, model)
+  cs &lt;- 0.5*(model$coefficients[[1]] - p)*q
+  return(cs)
+}
+# setting the functions equal to determine new equilibrium price after tax
+uniroot_after_tax &lt;- uniroot(function(p)
+  demand_agg_after_tax(p, mec = scc(scc5)) - mc_q(p),
+        interval = c(0,20))
+price_after_tax &lt;- uniroot_after_tax$root
+# total environmental damage
+enviro_damage_after_tax &lt;- scc(scc5)*demand_agg_after_tax(price_after_tax, mec = scc(scc5))
   
-   #- effects on &quot;high&quot; income consumers: 
-  
- # - effects on &quot;low&quot; income consumers: 
-  
-  #- effects on electricity producers:
-
-#$100 
-  
- #  - effects on &quot;high&quot; income consumers: 
-  
- # - effects on &quot;low&quot; income consumers: 
-  
-#  - effects on electricity producers:
-
-#$125
-  
-  # - effects on &quot;high&quot; income consumers: 
-  
- # - effects on &quot;low&quot; income consumers: 
-  
- # - effects on electricity producers:
-
-#$150 
-  
-  # - effects on &quot;high&quot; income consumers: 
-  
- # - effects on &quot;low&quot; income consumers: 
-  
- # - effects on electricity producers:</code></pre>
+env_cost_tax &lt;- scc(scc5)*demand_agg_after_tax(price_after_tax, mec = scc(scc5))
+# amount of electricity consumed after tax
+consumption_after_tax &lt;- demand_agg_after_tax(price_after_tax, mec = scc(scc5))
+# overall welfare to high and low income consumers
+cs_high_tax &lt;- CS(p = price_after_tax + scc(scc5), model = demand_high)
+cs_low_tax &lt;- CS(p = price_after_tax + scc(scc5), model = demand_low) - enviro_damage_after_tax
+# welfare for electricity producer
+ps_tax &lt;- function(p, mec){
+  ps &lt;- (p*demand_agg_after_tax(p, mec = mec))/2 # producer surplus
+  return(ps)
+}
+ps_tax &lt;- ps_tax(price_after_tax, mec = scc(scc5))
+welfare_h_5 &lt;- (cs_high_tax + proportion_high*env_cost_tax)/100 
+welfare_l_5 &lt;- (cs_low_tax + proportion_low*env_cost_tax)/100 
+ps_5 &lt;- 17175.51</code></pre>
+<p>Overall welfare of “high” income consumers: <strong>$4.975057^{4}</strong></p>
+<p>Overall welfare of “low” income consumers: <strong>$-1.506296^{4}</strong></p>
+<p>Welfare to power suppliers:<strong>$1.717551^{4}</strong></p>
 <ol start="6" style="list-style-type: decimal">
 <li>Suppose the “high” income group has access to expensive home solar generation. This lowers the electricity demand curve for the “high” income group by half (vertically). Under this new demand:</li>
 </ol>
 <ol style="list-style-type: lower-alpha">
 <li>What is total electricity consumption?</li>
 <li>What is the total environmental externality?</li>
-<li>What value of the electricity tax makes the total environmental damage the same as the damage when solar panels are available to the high income group?</li>
+<li>What value of the electricity tax makes the total environmental damage the same as the damage when solar panels are available to the high income group? shift demand curve down by half.</li>
 </ol>
+<pre class="r"><code>demand6 &lt;- function(p, model){
+  q &lt;- (p - (0.5*model$coefficients[1]))/model$coefficients[2]
+  q &lt;- ifelse(q&lt;0,0,q)
+  return(q)
+}
+
+# aggregate demand curve function after tax
+demand_agg6 &lt;- function(p){
+  q &lt;- demand6(p, model_demand_low) + demand6(p, model_demand_high)
+  return(q)
+}
+# setting the functions equal to determine new equilibrium price
+uniroot_after_tax &lt;- uniroot(function(p)
+  demand_agg6(p) - mc_q(p),
+        interval = c(0,20))
+price_after_tax &lt;- uniroot_after_tax$root
+electricity6 &lt;- demand_agg6(price_after_tax)
+enviro_cost_6 &lt;- electricity6*mec_cents
+
+c6 &lt;- (mec_cents/(enviro_cost_6/9478))*100</code></pre>
+<p><strong>Total electricity consumption:</strong> 2.6835973^{5} kWh</p>
+<p><strong>Total environmental externality:</strong> $5276.83</p>
+<p><strong>Tax to lower environmental damage to level with solar panels:</strong> 3.53 cents ```</p>
+<p>eqmQ = function(a,b,c) qstar= a/ b+c return qstar taxes are equal to marginal external cost</p>
+</div>
+</div>
 
 
 
