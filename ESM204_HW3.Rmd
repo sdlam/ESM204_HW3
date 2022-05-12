@@ -198,7 +198,7 @@ cs_high <- CS(10, model_demand_high)
 
 **Consumer benefit for low income consumers:** $`r round(cs_low/100, 2)`
 
-The low income consumers have a lower consumer benefit than the high income by a difference of $`r round((cs_high-cs_low)/100, 2)`
+The low income consumers have less consumer benefit than the high income by a difference of $`r round((cs_high-cs_low)/100, 2)`
 
 4. Derive the optimal electricity tax (in cents per kWh) using the interim SCC. 
 Based on the interim SCC the optimal electricity tax is *1.97* cents/kWh
@@ -207,9 +207,24 @@ assume that the climate externality is borne entirely by the “low” income gr
 be the effects of this tax on:
 
 ```{r}
-# supply curve adjusted for tax 
-#P = 0.0000186Q + 1.97
-Qt <- demand_agg(11.97)
+# agg demand curve adjusted for tax 
+#p = 29.78135 - .0000368Q - 11.97 = p = 17.81135 - .0000368Q
+
+#Agg demand after tax 
+demand_tax <- function(p, model, mec){
+  q <- (p - model$coefficients[[1]])-mec/model$coefficients[[2]]
+  q <- ifelse(q<0,0,q)
+  return(q)
+}
+
+demand_agg_tax <- function(p){
+  q <- demand_tax(p, demand_low) + demand_tax(p, demand_high)
+  return(q)
+}
+
+
+
+Qt <- demand_agg_tax(11.97)
 
 #high and low income surplus = welfare
 cs_tax_high <- CS(.1197, model_demand_high)/100
@@ -233,7 +248,6 @@ ps_tax <- 0.5*demand_agg(11.97)*0.1197 - env_cost_tax
 (e) The surplus to the producers of electricity under the tax scenario is $`r round(ps_tax, 2)`.
 (f) The total environmental damage under the tax scenario is $`r round(env_cost_tax, 2)`.
 (g) The total tax revenue generated under the tax scenario is $`r round(env_cost_tax, 2)`.
->>>>>>> 0dfe8b4174c27a4193a95bc16a361e5ca87ca60a
 
 5. Assuming that all revenue from the electricity tax will be redistributed to the consumers in
 proportion to their pre-tax consumption high income 
@@ -245,6 +259,8 @@ effects of an SCC-based electricity tax on:
 (c) Electricity producers
 
 ```{r}
+scc_co2 <- 51
+cents_per_kwh <- (0.85/metric_ton)*100*scc_co2
 #cs_tax_high 
 #$51
   
