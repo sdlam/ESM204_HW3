@@ -233,20 +233,46 @@ be the effects of this tax on:
 #p = 29.78135 - .0000368Q - 11.97 = p = 17.81135 - .0000368Q
 
 #Agg demand after tax 
-demand_tax <- function(p, model, mec){
+demand_after_tax <- function(p, model, mec){
   q <- (p - model$coefficients[[1]])-mec/model$coefficients[[2]]
   q <- ifelse(q<0,0,q)
   return(q)
 }
 
-demand_agg_tax <- function(p){
-  q <- demand_tax(p, demand_low) + demand_tax(p, demand_high)
+demand_agg_after_tax <- function(p, mec){
+  q <- demand_after_tax(p, demand_low, mec) + demand_after_tax(p, demand_high, mec)
   return(q)
 }
 
+q_star_51 <- demand_agg_after_tax(10, 1.97)
+p_star_51 <- supply_price(q_star_51)
+p_plus_t_51 <- p_star_51 + t_51
+CS_0_high <- CS(p_0, high_demand)
+CS_high_51 <- CS(p_plus_t_51, high_demand)
+CS_0_low <- CS(p_0, low_demand) - (t_51 * q_0)
+CS_low_51 <- CS(p_plus_t_51, low_demand) - (t_51 * q_star_51)
+PS_0 <- PS(p_0)
+PS_51 <- PS(p_star_51)
+TEC_0 <- TEC(p_0)
+TEC_51 <- TEC(p_star_51)
+tax_revenue_51 <- t_51 * q_star_51
 
+# total environmental damage
+enviro_cost_tax <- mec_cents*demand_agg_after_tax(price_after_tax)
+  
+tax_revenue <- mec_cents*demand_agg_after_tax(price_after_tax)
+# amount of electricity consumed after tax
+consumption_after_tax <- demand_agg_after_tax(price_after_tax)
+# overall welfare to high and low income consumers
+cs_tax_high <- CS(p = price_after_tax + mec_cents, model = model_demand_h)
+cs_tax_low <- CS(p = price_after_tax + mec_cents, model = model_demand_l) - enviro_damage_after_tax
+# welfare for electricity producer
+PS_after_tax <- function(p){
+  ps <- (p*demand_agg_after_tax(p))/2 # producer surplus
+  return(ps)
+}
+ps_tax <- PS_after_tax(price_after_tax)
 
-Qt <- demand_agg_tax(11.97)
 
 #high and low income surplus = welfare
 cs_tax_high <- CS(.1197, model_demand_high)/100
